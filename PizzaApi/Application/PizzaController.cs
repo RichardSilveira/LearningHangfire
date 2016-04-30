@@ -13,6 +13,7 @@ using Swashbuckle.Swagger.Annotations;
 using System.Net;
 using PizzaApi.DAL;
 using System.Data.Entity;
+using Hangfire;
 
 namespace PizzaApi.Application
 {
@@ -85,6 +86,8 @@ namespace PizzaApi.Application
 
                 _dbSet.Add(pizza);
                 pizzaDTO.PizzaID = await _context.SaveChangesAsync();
+
+                BackgroundJob.Enqueue(() => Console.WriteLine("Fire-and-forget"));
 
                 return Created(new Uri(_baseUri + pizzaDTO.PizzaID), pizzaDTO);
             }

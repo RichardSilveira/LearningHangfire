@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Swashbuckle.Application;
+using Hangfire;
 
 namespace PizzaApi
 {
@@ -30,12 +31,18 @@ namespace PizzaApi
 
             _configuration.EnableSwagger(c =>
             {
-                c.SingleApiVersion("v1", "MassTransit Configuration Sample");
+                c.SingleApiVersion("v1", "Hangfire Configuration Sample");
                 c.IncludeXmlComments(GetXmlCommentsPath());
                 c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             }).EnableSwaggerUi();
 
             app.UseWebApi(_configuration);
+
+            GlobalConfiguration.Configuration
+                .UseSqlServerStorage(@"Data Source=.\SQLEXPRESS;Initial Catalog=hangfiresample;Integrated Security=True");
+
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
         }
 
         protected static string GetXmlCommentsPath()
