@@ -11,6 +11,8 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using Swashbuckle.Application;
 using Hangfire;
+using Hangfire.Logging;
+using Hangfire.Logging.LogProviders;
 
 namespace PizzaApi
 {
@@ -38,11 +40,17 @@ namespace PizzaApi
 
             app.UseWebApi(_configuration);
 
+            //TODO: Try to use MongoDb than SQL Server instead.
             GlobalConfiguration.Configuration
                 .UseSqlServerStorage(@"Data Source=.\SQLEXPRESS;Initial Catalog=hangfiresample;Integrated Security=True");
 
-            app.UseHangfireDashboard();
+            //Hangfire configuration
+
+            var hangfireOptions = new DashboardOptions() { AppPath = "http://localhost:1234/swagger" };
+            app.UseHangfireDashboard("/hangfire", hangfireOptions);
             app.UseHangfireServer();
+
+            LogProvider.SetCurrentLogProvider(new ColouredConsoleLogProvider());
         }
 
         protected static string GetXmlCommentsPath()
