@@ -13,6 +13,7 @@ using Swashbuckle.Swagger.Annotations;
 using System.Net;
 using PizzaApi.DAL;
 using System.Data.Entity;
+using Hangfire;
 
 namespace PizzaApi.Application
 {
@@ -92,6 +93,8 @@ namespace PizzaApi.Application
             orderDTO = (OrderDTO)new OrderDTO().InjectFrom(order);
             orderDTO.StatusDescription = ((OrderStatus)order.Status).ToString();
 
+            BackgroundJob.Enqueue(() => Console.WriteLine("Fire-and-forget (Do something rigth now by an workder, outside this \"UI\" thread!)"));
+
             return Created(new Uri(_baseUri + orderDTO.OrderID), orderDTO);
         }
 
@@ -120,6 +123,13 @@ namespace PizzaApi.Application
 
             var orderDTO = (OrderDTO)new OrderDTO().InjectFrom(order);
             orderDTO.StatusDescription = ((OrderStatus)order.Status).ToString();
+
+            var delayedTimeInSeconds = order.EstimatedTime.Value * 60 * 0.65f;
+            Console.WriteLine("delayedTime: " + delayedTimeInSeconds);
+
+            BackgroundJob.Enqueue(() => Console.WriteLine("[Message to customer] Order approved."));
+            BackgroundJob.Schedule(() => Console.WriteLine("[Message to customer] Pay attention please. Your order is near to be done!"),
+                TimeSpan.FromSeconds(delayedTimeInSeconds));
 
             return Ok(orderDTO);
         }

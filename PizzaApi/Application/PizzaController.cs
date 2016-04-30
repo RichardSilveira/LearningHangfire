@@ -86,9 +86,7 @@ namespace PizzaApi.Application
 
                 _dbSet.Add(pizza);
                 pizzaDTO.PizzaID = await _context.SaveChangesAsync();
-
-                BackgroundJob.Enqueue(() => Console.WriteLine("Fire-and-forget"));
-
+                
                 return Created(new Uri(_baseUri + pizzaDTO.PizzaID), pizzaDTO);
             }
             catch (Exception exc)
